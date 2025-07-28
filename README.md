@@ -15,7 +15,7 @@ GrowthCamp의 다양한 도구들을 한 곳에서 관리하고 접근할 수 �
 - **UI Library**: React Bootstrap
 - **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable
 - **Backend**: Supabase (PostgreSQL + Auth)
-- **Deployment**: Google Cloud Storage + GitHub Actions
+- **Deployment**: Google Cloud Run + GitHub Actions
 
 ## 📦 설치 및 실행
 
@@ -44,22 +44,40 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ### Google Cloud 설정
 
 1. **Google Cloud 프로젝트 생성**
-2. **Cloud Storage 버킷 생성**
+2. **Cloud Run API 활성화**
 3. **서비스 계정 생성 및 키 다운로드**
+4. **Container Registry API 활성화**
 
 ### GitHub Secrets 설정
 
 GitHub 저장소의 Settings > Secrets and variables > Actions에서 다음 시크릿을 설정하세요:
 
 - `GCP_PROJECT_ID`: Google Cloud 프로젝트 ID
-- `GCP_BUCKET_NAME`: Cloud Storage 버킷 이름
 - `GCP_SA_KEY`: 서비스 계정 키 (JSON)
 - `VITE_SUPABASE_URL`: Supabase URL
 - `VITE_SUPABASE_ANON_KEY`: Supabase Anonymous Key
 
 ### 자동 배포
 
-main 브랜치에 코드를 푸시하면 자동으로 Google Cloud Storage에 배포됩니다.
+main 브랜치에 코드를 푸시하면 자동으로 Google Cloud Run에 배포됩니다.
+
+### 수동 배포
+
+```bash
+# Docker 이미지 빌드
+docker build -t gcr.io/PROJECT_ID/ax-tools-app .
+
+# Container Registry에 푸시
+docker push gcr.io/PROJECT_ID/ax-tools-app
+
+# Cloud Run에 배포
+gcloud run deploy ax-tools-app \
+  --image gcr.io/PROJECT_ID/ax-tools-app \
+  --platform managed \
+  --region asia-northeast3 \
+  --allow-unauthenticated \
+  --port 8080
+```
 
 ## 📊 데이터베이스 설정
 
@@ -115,10 +133,29 @@ FOR ALL USING (auth.role() = 'authenticated');
 
 ## 📈 성능 최적화
 
-- **코드 스플리팅**: 라이브러리별 청크 분리
-- **이미지 최적화**: SVG 로고 사용
+- **컨테이너화**: Docker를 통한 일관된 배포
+- **Nginx**: 정적 파일 서빙 최적화
+- **Gzip 압축**: 전송 크기 최소화
 - **캐싱**: 브라우저 캐시 활용
-- **CDN**: Google Cloud CDN 활용
+- **Auto-scaling**: Cloud Run 자동 스케일링
+
+## 🐳 Docker
+
+### 로컬에서 Docker 실행
+
+```bash
+# 이미지 빌드
+docker build -t ax-tools-app .
+
+# 컨테이너 실행
+docker run -p 8080:8080 ax-tools-app
+```
+
+### Docker 이미지 구조
+
+- **Multi-stage build**: 빌드와 런타임 분리
+- **Nginx**: 정적 파일 서빙
+- **최적화된 크기**: Alpine Linux 기반
 
 ## 🤝 기여
 
