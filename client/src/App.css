@@ -32,7 +32,7 @@
 .brand-logo {
   height: 2.5rem;
   width: auto;
-  filter: brightness(0) invert(1);
+  filter: none; /* 원본 색상 사용 */
 }
 
 .brand-text {

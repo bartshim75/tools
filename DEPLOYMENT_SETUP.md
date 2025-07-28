@@ -1,10 +1,15 @@
 # 🚀 AX Tools 배포 설정 가이드
 
-## ⚠️ 중요: 올바른 서비스 계정 생성
+## ✅ **배포 성공!**
 
-**현재 문제**: Compute Engine 기본 서비스 계정을 사용하고 있습니다. 이는 배포에 필요한 권한이 부족할 수 있습니다.
+현재 AX Tools는 Google Cloud Run에서 성공적으로 배포되어 운영 중입니다.
 
-**해결 방법**: 전용 서비스 계정을 생성해야 합니다.
+### **배포 정보**
+- **서비스**: ax-tools-app
+- **리전**: us-central1
+- **플랫폼**: Google Cloud Run
+- **컨테이너**: Docker + Nginx
+- **CI/CD**: GitHub Actions
 
 ## 📋 GitHub Secrets 설정
 
@@ -74,6 +79,9 @@ gcloud iam service-accounts keys create ax-tools-deploy-key.json \
 ```bash
 # JSON 파일을 base64로 인코딩
 base64 -i ax-tools-deploy-key.json
+
+# 또는 macOS에서
+base64 -i ax-tools-deploy-key.json | pbcopy
 ```
 
 1. 위 명령어의 출력을 복사
@@ -83,6 +91,24 @@ base64 -i ax-tools-deploy-key.json
 1. `ax-tools-deploy-key.json` 파일을 열기
 2. 파일의 전체 내용을 복사 (Ctrl+A, Ctrl+C)
 3. GitHub Secrets의 `GCP_SA_KEY`에 붙여넣기 (Ctrl+V)
+
+## 🚀 자동 배포
+
+### 배포 트리거
+- **main 브랜치에 푸시** 시 자동 배포
+- **Pull Request** 시 배포 테스트
+
+### 배포 과정
+1. **코드 체크아웃**: GitHub Actions가 최신 코드를 가져옴
+2. **Google Cloud 인증**: 서비스 계정으로 인증
+3. **Docker 이미지 빌드**: React 앱을 Docker 컨테이너로 빌드
+4. **Artifact Registry 푸시**: 이미지를 Google Artifact Registry에 업로드
+5. **Cloud Run 배포**: 새 이미지로 Cloud Run 서비스 업데이트
+
+### 배포 확인
+- GitHub Actions 탭에서 배포 상태 확인
+- Cloud Run 콘솔에서 서비스 상태 확인
+- 배포된 URL로 접속하여 기능 테스트
 
 ## 🔍 문제 해결
 
@@ -183,4 +209,48 @@ base64 -i ax-tools-deploy-key.json
 base64 -i ax-tools-deploy-key.json | pbcopy
 ```
 
-이렇게 인코딩된 값을 GitHub Secrets의 `GCP_SA_KEY`에 붙여넣으면 형식 문제를 피할 수 있습니다. 
+이렇게 인코딩된 값을 GitHub Secrets의 `GCP_SA_KEY`에 붙여넣으면 형식 문제를 피할 수 있습니다.
+
+## 🎯 성공적인 배포 후 확인사항
+
+### 1. 기능 테스트
+- [ ] 로그인/로그아웃 기능
+- [ ] 도구 추가/수정/삭제 기능
+- [ ] 드래그 앤 드롭 순서 변경
+- [ ] 반응형 디자인 (모바일/태블릿/데스크톱)
+- [ ] SVG 로고 표시
+
+### 2. 성능 확인
+- [ ] 페이지 로딩 속도
+- [ ] 이미지 로딩
+- [ ] 데이터베이스 연결
+
+### 3. 보안 확인
+- [ ] HTTPS 연결
+- [ ] 인증 토큰 관리
+- [ ] API 키 보안
+
+## 📈 모니터링
+
+### Google Cloud Console
+- Cloud Run 서비스 모니터링
+- 로그 확인
+- 리소스 사용량 확인
+
+### GitHub Actions
+- 배포 히스토리 확인
+- 빌드 로그 분석
+- 성공/실패 통계
+
+## 🔄 업데이트 프로세스
+
+### 코드 변경 시
+1. 로컬에서 코드 수정
+2. Git 커밋 및 푸시
+3. GitHub Actions 자동 배포
+4. 배포 완료 확인
+
+### 환경 변수 변경 시
+1. GitHub Secrets 업데이트
+2. 수동 배포 트리거 또는 코드 푸시
+3. 새 환경 변수 적용 확인 
