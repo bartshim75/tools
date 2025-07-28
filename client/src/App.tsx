@@ -182,8 +182,18 @@ function App() {
   };
 
   const checkAdminStatus = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setIsAdmin(!!session);
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error checking session:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(!!session);
+      }
+    } catch (error) {
+      console.error('Unexpected error checking session:', error);
+      setIsAdmin(false);
+    }
   };
 
   const showAlert = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -195,25 +205,38 @@ function App() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      showAlert('로그인에 실패했습니다: ' + error.message, 'error');
-    } else {
-      showAlert('관리자로 로그인되었습니다!');
-      setEmail('');
-      setPassword('');
-      setShowLoginModal(false);
-      checkAdminStatus();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        showAlert('로그인에 실패했습니다: ' + error.message, 'error');
+      } else {
+        showAlert('관리자로 로그인되었습니다!');
+        setEmail('');
+        setPassword('');
+        setShowLoginModal(false);
+        await checkAdminStatus();
+      }
+    } catch (error) {
+      console.error('Unexpected error during login:', error);
+      showAlert('로그인 중 예상치 못한 오류가 발생했습니다.', 'error');
     }
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error logging out:', error);
-    } else {
-      showAlert('로그아웃되었습니다.');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error logging out:', error);
+        showAlert('로그아웃 중 오류가 발생했습니다.', 'error');
+      } else {
+        showAlert('로그아웃되었습니다.');
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error('Unexpected error during logout:', error);
+      // 세션 에러가 발생해도 로컬 상태는 초기화
       setIsAdmin(false);
+      showAlert('로그아웃되었습니다.');
     }
   };
 
