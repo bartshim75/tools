@@ -16,8 +16,8 @@ GitHub 저장소의 **Settings > Secrets and variables > Actions**에서 다음 
 - **확인 방법**: Google Cloud Console 상단에서 프로젝트 ID 확인
 
 ### 2. GCP_SA_KEY
-- **설명**: 서비스 계정 키 JSON
-- **값**: 새로 생성된 서비스 계정 키 JSON 파일의 전체 내용
+- **설명**: 서비스 계정 키 JSON (base64 인코딩 권장)
+- **값**: 서비스 계정 키 JSON을 base64로 인코딩한 값
 - **생성 방법**: 아래 "서비스 계정 설정" 참조
 
 ### 3. VITE_SUPABASE_URL
@@ -68,8 +68,19 @@ gcloud iam service-accounts keys create ax-tools-deploy-key.json \
   --iam-account=ax-tools-deploy@r3-poob.iam.gserviceaccount.com
 ```
 
-### 4. GitHub Secrets에 키 추가
-1. 생성된 `ax-tools-deploy-key.json` 파일을 열기
+### 4. GitHub Secrets에 키 추가 (base64 인코딩 권장)
+
+#### 방법 1: base64 인코딩 사용 (권장)
+```bash
+# JSON 파일을 base64로 인코딩
+base64 -i ax-tools-deploy-key.json
+```
+
+1. 위 명령어의 출력을 복사
+2. GitHub Secrets의 `GCP_SA_KEY`에 붙여넣기
+
+#### 방법 2: 직접 JSON 사용
+1. `ax-tools-deploy-key.json` 파일을 열기
 2. 파일의 전체 내용을 복사 (Ctrl+A, Ctrl+C)
 3. GitHub Secrets의 `GCP_SA_KEY`에 붙여넣기 (Ctrl+V)
 
@@ -158,4 +169,18 @@ GitHub Actions에서 "Test GitHub Secrets" 워크플로우를 실행하여 설�
 3. **GitHub Secrets 재설정**
    - 기존 `GCP_SA_KEY` 삭제
    - 새로 생성된 키 파일의 전체 내용을 복사
-   - GitHub Secrets에 다시 추가 
+   - GitHub Secrets에 다시 추가
+
+### base64 인코딩 사용 (권장)
+
+JSON 형식 문제를 해결하기 위해 base64 인코딩을 사용하세요:
+
+```bash
+# JSON 파일을 base64로 인코딩
+base64 -i ax-tools-deploy-key.json
+
+# 또는 macOS에서
+base64 -i ax-tools-deploy-key.json | pbcopy
+```
+
+이렇게 인코딩된 값을 GitHub Secrets의 `GCP_SA_KEY`에 붙여넣으면 형식 문제를 피할 수 있습니다. 
