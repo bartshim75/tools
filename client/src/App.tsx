@@ -77,11 +77,15 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
               사용하기
             </Button>
             {isAdmin && (
-              <div className="admin-actions">
+              <div className="admin-actions" onClick={(e) => e.stopPropagation()}>
                 <Button
                   variant="warning"
                   size="sm"
-                  onClick={() => onEdit(tool)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Edit button clicked for tool:', tool.name);
+                    onEdit(tool);
+                  }}
                   className="edit-btn"
                 >
                   수정
@@ -89,7 +93,11 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={() => onDelete(tool.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Delete button clicked for tool:', tool.name);
+                    onDelete(tool.id);
+                  }}
                   className="delete-btn"
                 >
                   삭제
