@@ -19,6 +19,8 @@
   z-index: 1000 !important;
 }
 
+
+
 .navbar-container {
   max-width: 1280px;
   margin: 0 auto;
@@ -59,6 +61,11 @@
   margin-top: 0.125rem;
 }
 
+.login-container {
+  display: flex;
+  align-items: center;
+}
+
 .login-btn {
   font-size: 0.875rem;
   padding: 0.375rem 0.75rem;
@@ -85,6 +92,8 @@
   white-space: nowrap; /* 한 줄로 표시 강제 */
   min-width: 0; /* 플렉스 아이템 축소 허용 */
 }
+
+
 
 .center-title .brand-name-logo {
   height: 38px; /* 로고 크기 38px로 설정 */
@@ -448,8 +457,9 @@
   }
   
   .admin-actions {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.375rem;
+    justify-content: center;
   }
   
   .edit-btn, .delete-btn, .visibility-btn {

@@ -386,7 +386,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <Navbar bg="dark" variant="dark" expand="lg" className="custom-navbar">
+      <Navbar bg="dark" variant="dark" className="custom-navbar">
         <Container className="navbar-container">
           <Navbar.Brand href="#home" className="brand-container">
             <img src={gcampLogo} alt="GrowthCamp Logo" className="brand-logo" />
@@ -398,8 +398,7 @@ function App() {
             <span className="brand-subtitle">AX Tools</span>
           </div>
           
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
+          <div className="login-container">
             {isAdmin ? (
               <Button variant="outline-light" size="sm" onClick={handleLogout} className="login-btn">
                 로그아웃
@@ -409,7 +408,7 @@ function App() {
                 로그인
               </Button>
             )}
-          </Navbar.Collapse>
+          </div>
         </Container>
       </Navbar>
 
