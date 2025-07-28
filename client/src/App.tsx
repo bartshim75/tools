@@ -121,7 +121,17 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete, onToggleVisibility 
         </Card.Body>
         {/* 드래그 핸들러를 카드 상단에 별도로 배치 */}
         <div className="drag-handle" {...listeners}>
-          ⋮⋮
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="4" cy="4" r="1.5"/>
+            <circle cx="8" cy="4" r="1.5"/>
+            <circle cx="12" cy="4" r="1.5"/>
+            <circle cx="4" cy="8" r="1.5"/>
+            <circle cx="8" cy="8" r="1.5"/>
+            <circle cx="12" cy="8" r="1.5"/>
+            <circle cx="4" cy="12" r="1.5"/>
+            <circle cx="8" cy="12" r="1.5"/>
+            <circle cx="12" cy="12" r="1.5"/>
+          </svg>
         </div>
       </Card>
     </div>
@@ -224,11 +234,23 @@ function App() {
 
   const handleLogout = async () => {
     try {
+      console.log('Starting logout process...');
+      
+      // 먼저 현재 세션 상태 확인
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Session check error:', sessionError);
+      } else {
+        console.log('Current session:', session ? 'Active' : 'None');
+      }
+      
+      // 로그아웃 시도
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error logging out:', error);
         showAlert('로그아웃 중 오류가 발생했습니다.', 'error');
       } else {
+        console.log('Logout successful');
         showAlert('로그아웃되었습니다.');
         setIsAdmin(false);
       }
