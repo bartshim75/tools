@@ -31,13 +31,15 @@ jobs:
       run: |
         gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
         
-    - name: Create Artifact Registry repository
+    - name: Create Artifact Registry repository (if not exists)
       run: |
+        gcloud artifacts repositories describe ${{ env.REPOSITORY }} \
+          --location=${{ env.REGION }} \
+          --quiet || \
         gcloud artifacts repositories create ${{ env.REPOSITORY }} \
           --repository-format=docker \
           --location=${{ env.REGION }} \
-          --description="AX Tools App Repository" \
-          --quiet || true
+          --description="AX Tools App Repository"
         
     - name: Build and push Docker image
       run: |
