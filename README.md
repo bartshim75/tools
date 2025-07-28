@@ -65,14 +65,14 @@ main 브랜치에 코드를 푸시하면 자동으로 Google Cloud Run에 배포
 
 ```bash
 # Docker 이미지 빌드
-docker build -t gcr.io/PROJECT_ID/ax-tools-app .
+docker build -t us-central1-docker.pkg.dev/PROJECT_ID/ax-tools-app/ax-tools-app .
 
-# Container Registry에 푸시
-docker push gcr.io/PROJECT_ID/ax-tools-app
+# Artifact Registry에 푸시
+docker push us-central1-docker.pkg.dev/PROJECT_ID/ax-tools-app/ax-tools-app
 
 # Cloud Run에 배포
 gcloud run deploy ax-tools-app \
-  --image gcr.io/PROJECT_ID/ax-tools-app \
+  --image us-central1-docker.pkg.dev/PROJECT_ID/ax-tools-app/ax-tools-app \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
