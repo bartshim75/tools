@@ -221,17 +221,32 @@ function App() {
   };
 
   const handleDeleteTool = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this tool?')) return;
+    console.log('Delete tool called with ID:', id);
+    console.log('Current admin status:', isAdmin);
+    
+    if (!window.confirm('정말로 이 도구를 삭제하시겠습니까?')) {
+      console.log('Delete cancelled by user');
+      return;
+    }
 
-    const { error } = await supabase
-      .from('tools')
-      .delete()
-      .eq('id', id);
-    if (error) {
-      alert('Error deleting tool: ' + error.message);
-    } else {
-      setTools(tools.filter(tool => tool.id !== id));
-      alert('Tool deleted successfully!');
+    try {
+      console.log('Attempting to delete tool from Supabase...');
+      const { error } = await supabase
+        .from('tools')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Supabase delete error:', error);
+        alert('도구 삭제 중 오류가 발생했습니다: ' + error.message);
+      } else {
+        console.log('Tool deleted successfully from database');
+        setTools(tools.filter(tool => tool.id !== id));
+        alert('도구가 성공적으로 삭제되었습니다!');
+      }
+    } catch (err) {
+      console.error('Unexpected error during delete:', err);
+      alert('삭제 중 예상치 못한 오류가 발생했습니다.');
     }
   };
 

@@ -15,11 +15,17 @@ COPY client/ ./
 # Build the application
 RUN npm run build
 
+# Verify SVG files are copied
+RUN ls -la dist/ && echo "SVG files in dist:" && ls -la dist/*.svg || echo "No SVG files found"
+
 # Production stage
 FROM nginx:alpine
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Verify files in production container
+RUN ls -la /usr/share/nginx/html/ && echo "SVG files in nginx:" && ls -la /usr/share/nginx/html/*.svg || echo "No SVG files found in nginx"
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
