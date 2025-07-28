@@ -58,8 +58,8 @@ gcloud iam service-accounts keys create ax-tools-deploy-key.json \
 
 ### 4. GitHub Secrets에 키 추가
 1. 생성된 `ax-tools-deploy-key.json` 파일을 열기
-2. 파일의 전체 내용을 복사
-3. GitHub Secrets의 `GCP_SA_KEY`에 붙여넣기
+2. 파일의 전체 내용을 복사 (Ctrl+A, Ctrl+C)
+3. GitHub Secrets의 `GCP_SA_KEY`에 붙여넣기 (Ctrl+V)
 
 ## 🔍 문제 해결
 
@@ -85,6 +85,12 @@ gcloud iam service-accounts keys create ax-tools-deploy-key.json \
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ax-tools-deploy%40your-project-id.iam.gserviceaccount.com"
 }
 ```
+
+**⚠️ 중요**: JSON 형식 오류가 발생하는 경우:
+1. **전체 JSON 복사**: 파일의 처음부터 끝까지 모든 내용을 복사
+2. **특수 문자 확인**: 줄바꿈 문자(`\n`)가 올바르게 포함되어 있는지 확인
+3. **따옴표 확인**: 모든 키와 값이 올바른 따옴표로 감싸져 있는지 확인
+4. **중괄호 확인**: JSON이 `{`로 시작하고 `}`로 끝나는지 확인
 
 #### 3. 서비스 계정 권한 확인
 Google Cloud Console → IAM & Admin → IAM에서 서비스 계정에 다음 권한이 있는지 확인:
@@ -116,4 +122,30 @@ GitHub Actions에서 "Test GitHub Secrets" 워크플로우를 실행하여 설�
 1. GitHub 저장소 → Actions 탭
 2. "Test GitHub Secrets" 워크플로우 선택
 3. "Run workflow" 버튼 클릭
-4. 결과 확인 
+4. 결과 확인
+
+## 🔧 JSON 형식 문제 해결
+
+### JSON 형식 오류가 발생하는 경우:
+
+1. **서비스 계정 키 재생성**
+   ```bash
+   # 기존 키 삭제 (선택사항)
+   gcloud iam service-accounts keys delete KEY_ID \
+     --iam-account=ax-tools-deploy@YOUR_PROJECT_ID.iam.gserviceaccount.com
+   
+   # 새 키 생성
+   gcloud iam service-accounts keys create ax-tools-deploy-key.json \
+     --iam-account=ax-tools-deploy@YOUR_PROJECT_ID.iam.gserviceaccount.com
+   ```
+
+2. **JSON 형식 검증**
+   ```bash
+   # 로컬에서 JSON 형식 확인
+   python3 -c "import json; json.load(open('ax-tools-deploy-key.json'))"
+   ```
+
+3. **GitHub Secrets 재설정**
+   - 기존 `GCP_SA_KEY` 삭제
+   - 새로 생성된 키 파일의 전체 내용을 복사
+   - GitHub Secrets에 다시 추가 
