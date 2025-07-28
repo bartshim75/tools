@@ -59,7 +59,7 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes}>
       <Card className={`tool-card ${isAdmin ? 'admin-mode' : ''} ${isDragging ? 'dragging' : ''}`}>
         <Card.Body className="tool-card-body">
           <Card.Title className="tool-title">{tool.name}</Card.Title>
@@ -77,12 +77,11 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
               사용하기
             </Button>
             {isAdmin && (
-              <div className="admin-actions" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-actions">
                 <Button
                   variant="warning"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={() => {
                     console.log('Edit button clicked for tool:', tool.name);
                     onEdit(tool);
                   }}
@@ -93,8 +92,7 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={() => {
                     console.log('Delete button clicked for tool:', tool.name);
                     onDelete(tool.id);
                   }}
@@ -106,6 +104,10 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
             )}
           </div>
         </Card.Body>
+        {/* 드래그 핸들러를 카드 상단에 별도로 배치 */}
+        <div className="drag-handle" {...listeners}>
+          ⋮⋮
+        </div>
       </Card>
     </div>
   );

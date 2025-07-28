@@ -165,7 +165,7 @@
   transition: all 0.3s ease;
   overflow: hidden;
   margin-bottom: 2rem; /* 카드 간 상하 마진 추가 */
-  cursor: grab;
+  position: relative;
 }
 
 .tool-card:hover {
@@ -181,6 +181,30 @@
   transform: rotate(5deg);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   z-index: 1000;
+}
+
+.drag-handle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  cursor: grab;
+  display: none;
+  z-index: 10;
+  color: #6c757d;
+  font-size: 12px;
+  text-align: center;
+  line-height: 20px;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  color: #495057;
+}
+
+.tool-card.admin-mode .drag-handle {
+  display: block;
 }
 
 .tool-card-body {
