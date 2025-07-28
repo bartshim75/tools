@@ -36,14 +36,16 @@ interface Tool {
   url: string;
   description: string | null;
   order_index: number;
+  is_hidden: boolean;
 }
 
 // 드래그 가능한 도구 카드 컴포넌트
-function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
+function SortableToolCard({ tool, isAdmin, onEdit, onDelete, onToggleVisibility }: {
   tool: Tool;
   isAdmin: boolean;
   onEdit: (tool: Tool) => void;
   onDelete: (id: string) => void;
+  onToggleVisibility: (id: string, currentHidden: boolean) => void;
 }) {
   const {
     attributes,
@@ -78,32 +80,43 @@ function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
             >
               사용하기
             </Button>
-            {isAdmin && (
-              <div className="admin-actions">
-                <Button
-                  variant="warning"
-                  size="sm"
-                  onClick={() => {
-                    console.log('Edit button clicked for tool:', tool.name);
-                    onEdit(tool);
-                  }}
-                  className="edit-btn"
-                >
-                  수정
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    console.log('Delete button clicked for tool:', tool.name);
-                    onDelete(tool.id);
-                  }}
-                  className="delete-btn"
-                >
-                  삭제
-                </Button>
-              </div>
-            )}
+                               {isAdmin && (
+                     <div className="admin-actions">
+                       <Button
+                         variant={tool.is_hidden ? "success" : "secondary"}
+                         size="sm"
+                         onClick={() => {
+                           console.log('Toggle visibility button clicked for tool:', tool.name);
+                           onToggleVisibility(tool.id, tool.is_hidden);
+                         }}
+                         className="visibility-btn"
+                       >
+                         {tool.is_hidden ? "보이기" : "숨기기"}
+                       </Button>
+                       <Button
+                         variant="warning"
+                         size="sm"
+                         onClick={() => {
+                           console.log('Edit button clicked for tool:', tool.name);
+                           onEdit(tool);
+                         }}
+                         className="edit-btn"
+                       >
+                         수정
+                       </Button>
+                       <Button
+                         variant="danger"
+                         size="sm"
+                         onClick={() => {
+                           console.log('Delete button clicked for tool:', tool.name);
+                           onDelete(tool.id);
+                         }}
+                         className="delete-btn"
+                       >
+                         삭제
+                       </Button>
+                     </div>
+                   )}
           </div>
         </Card.Body>
         {/* 드래그 핸들러를 카드 상단에 별도로 배치 */}
@@ -125,6 +138,9 @@ function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
+  const [showCustomAlert, setShowCustomAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error' | 'info'>('success');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -170,13 +186,20 @@ function App() {
     setIsAdmin(!!session);
   };
 
+  const showAlert = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowCustomAlert(true);
+    setTimeout(() => setShowCustomAlert(false), 3000); // 3초 후 자동 닫기
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      alert('Login failed: ' + error.message);
+      showAlert('로그인에 실패했습니다: ' + error.message, 'error');
     } else {
-      alert('Logged in as admin!');
+      showAlert('관리자로 로그인되었습니다!');
       setEmail('');
       setPassword('');
       setShowLoginModal(false);
@@ -189,7 +212,7 @@ function App() {
     if (error) {
       console.error('Error logging out:', error);
     } else {
-      alert('Logged out.');
+      showAlert('로그아웃되었습니다.');
       setIsAdmin(false);
     }
   };
@@ -197,19 +220,19 @@ function App() {
   const handleAddTool = async (e: React.FormEvent) => {
     e.preventDefault();
     const maxOrderIndex = tools.length > 0 ? Math.max(...tools.map(t => t.order_index)) : -1;
-    const newToolWithOrder = { ...newTool, order_index: maxOrderIndex + 1 };
+    const newToolWithOrder = { ...newTool, order_index: maxOrderIndex + 1, is_hidden: false };
     
     const { data, error } = await supabase
       .from('tools')
       .insert([newToolWithOrder])
       .select();
     if (error) {
-      alert('Error adding tool: ' + error.message);
+      showAlert('도구 추가 중 오류가 발생했습니다: ' + error.message, 'error');
     } else {
       setTools([...tools, data[0]]);
       setNewTool({ name: '', url: '', description: '' });
       setShowAddEditModal(false);
-      alert('Tool added successfully!');
+      showAlert(`"${newToolWithOrder.name}" 도구가 추가되었습니다.`);
     }
   };
 
@@ -223,12 +246,12 @@ function App() {
       .eq('id', editingTool.id)
       .select();
     if (error) {
-      alert('Error updating tool: ' + error.message);
+      showAlert('도구 수정 중 오류가 발생했습니다: ' + error.message, 'error');
     } else {
       setTools(tools.map(tool => (tool.id === editingTool.id ? data[0] : tool)));
       setEditingTool(null);
       setShowAddEditModal(false);
-      alert('Tool updated successfully!');
+      showAlert(`"${editingTool.name}" 도구가 변경되었습니다.`);
     }
   };
 
@@ -250,15 +273,16 @@ function App() {
       
       if (error) {
         console.error('Supabase delete error:', error);
-        alert('도구 삭제 중 오류가 발생했습니다: ' + error.message);
+        showAlert('도구 삭제 중 오류가 발생했습니다: ' + error.message, 'error');
       } else {
         console.log('Tool deleted successfully from database');
+        const deletedTool = tools.find(tool => tool.id === id);
         setTools(tools.filter(tool => tool.id !== id));
-        alert('도구가 성공적으로 삭제되었습니다!');
+        showAlert(`"${deletedTool?.name}" 도구가 삭제되었습니다.`);
       }
     } catch (err) {
       console.error('Unexpected error during delete:', err);
-      alert('삭제 중 예상치 못한 오류가 발생했습니다.');
+      showAlert('삭제 중 예상치 못한 오류가 발생했습니다.', 'error');
     }
   };
 
@@ -271,6 +295,31 @@ function App() {
     setEditingTool(null);
     setNewTool({ name: '', url: 'https://', description: '' }); // URL 자동입력
     setShowAddEditModal(true);
+  };
+
+  const handleToggleVisibility = async (id: string, currentHidden: boolean) => {
+    console.log('handleToggleVisibility called with id:', id, 'currentHidden:', currentHidden);
+    try {
+      const { error } = await supabase
+        .from('tools')
+        .update({ is_hidden: !currentHidden })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error toggling visibility:', error);
+        showAlert('가시성 변경 중 오류가 발생했습니다.', 'error');
+      } else {
+        console.log('Visibility toggled successfully');
+        const targetTool = tools.find(tool => tool.id === id);
+        setTools(tools.map(tool => 
+          tool.id === id ? { ...tool, is_hidden: !currentHidden } : tool
+        ));
+        showAlert(`"${targetTool?.name}" 도구가 ${currentHidden ? '표시' : '숨겨짐'} 되었습니다.`);
+      }
+    } catch (error) {
+      console.error('Error in handleToggleVisibility:', error);
+      showAlert('가시성 변경 중 오류가 발생했습니다.', 'error');
+    }
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -300,10 +349,10 @@ function App() {
           }
         }
         
-        alert('도구 순서가 성공적으로 변경되었습니다!');
+        showAlert('도구 순서가 성공적으로 변경되었습니다!');
       } catch (error) {
         console.error('Error updating tool order:', error);
-        alert('순서 변경 중 오류가 발생했습니다. 콘솔을 확인해주세요.');
+        showAlert('순서 변경 중 오류가 발생했습니다.', 'error');
         // 오류 시 원래 순서로 복원
         fetchTools();
       }
@@ -368,13 +417,16 @@ function App() {
                 strategy={verticalListSortingStrategy}
               >
                 <Row xs={1} md={2} lg={3} className="tools-grid">
-                  {tools.map((tool) => (
+                  {tools
+                    .filter(tool => isAdmin || !tool.is_hidden) // 관리자가 아니면 숨겨진 도구는 표시하지 않음
+                    .map((tool) => (
                     <Col key={tool.id}>
                       <SortableToolCard
                         tool={tool}
                         isAdmin={isAdmin}
                         onEdit={openEditModal}
                         onDelete={handleDeleteTool}
+                        onToggleVisibility={handleToggleVisibility}
                       />
                     </Col>
                   ))}
@@ -478,6 +530,23 @@ function App() {
           </Form>
         </Modal.Body>
       </Modal>
+
+      {/* 커스텀 알림 팝업 */}
+      {showCustomAlert && (
+        <div className="custom-alert-overlay">
+          <div className={`custom-alert ${alertType}`}>
+            <div className="custom-alert-content">
+              <div className="custom-alert-message">{alertMessage}</div>
+              <button 
+                className="custom-alert-close"
+                onClick={() => setShowCustomAlert(false)}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
