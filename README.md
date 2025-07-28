@@ -74,7 +74,7 @@ docker push gcr.io/PROJECT_ID/ax-tools-app
 gcloud run deploy ax-tools-app \
   --image gcr.io/PROJECT_ID/ax-tools-app \
   --platform managed \
-  --region asia-northeast3 \
+  --region us-central1 \
   --allow-unauthenticated \
   --port 8080
 ```

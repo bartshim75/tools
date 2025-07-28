@@ -9,7 +9,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   SERVICE_NAME: ax-tools-app
-  REGION: asia-northeast3
+  REGION: us-central1
 
 jobs:
   build-and-deploy:
