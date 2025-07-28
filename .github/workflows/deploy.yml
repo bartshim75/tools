@@ -27,6 +27,31 @@ jobs:
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
         
+    - name: Manual Google Cloud Authentication
+      run: |
+        echo "=== Manual Google Cloud Authentication ==="
+        
+        # Check if service account key is provided
+        if [ -z "${{ secrets.GCP_SA_KEY }}" ]; then
+          echo "❌ GCP_SA_KEY is not set or empty"
+          exit 1
+        fi
+        
+        # Create service account key file
+        echo "${{ secrets.GCP_SA_KEY }}" > /tmp/service-account-key.json
+        
+        # Verify the JSON is valid
+        if ! jq empty /tmp/service-account-key.json 2>/dev/null; then
+          echo "❌ GCP_SA_KEY is not valid JSON"
+          exit 1
+        fi
+        
+        # Authenticate with service account
+        gcloud auth activate-service-account --key-file=/tmp/service-account-key.json
+        gcloud config set project ${{ env.PROJECT_ID }}
+        
+        echo "✅ Service account authentication successful"
+        
     - name: Verify Google Cloud authentication
       run: |
         echo "=== Google Cloud Authentication Check ==="

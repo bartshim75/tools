@@ -64,17 +64,56 @@ gcloud iam service-accounts keys create ax-tools-deploy-key.json \
 ## 🔍 문제 해결
 
 ### 인증 오류가 발생하는 경우:
-1. **서비스 계정 키 확인**: JSON 형식이 올바른지 확인
-2. **권한 확인**: 서비스 계정에 필요한 권한이 있는지 확인
-3. **프로젝트 ID 확인**: `GCP_PROJECT_ID`가 올바른지 확인
+
+#### 1. GitHub Secrets 확인
+- GitHub 저장소 → Settings → Secrets and variables → Actions
+- 모든 필수 Secrets가 설정되어 있는지 확인
+
+#### 2. 서비스 계정 키 형식 확인
+`GCP_SA_KEY`는 다음과 같은 형식이어야 합니다:
+```json
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  "private_key_id": "key-id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...\n-----END PRIVATE KEY-----\n",
+  "client_email": "ax-tools-deploy@your-project-id.iam.gserviceaccount.com",
+  "client_id": "client-id",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ax-tools-deploy%40your-project-id.iam.gserviceaccount.com"
+}
+```
+
+#### 3. 서비스 계정 권한 확인
+Google Cloud Console → IAM & Admin → IAM에서 서비스 계정에 다음 권한이 있는지 확인:
+- `Artifact Registry Repository Administrator`
+- `Cloud Run Admin`
+- `Service Account User`
+
+#### 4. API 활성화 확인
+Google Cloud Console에서 다음 API가 활성화되어 있는지 확인:
+- Artifact Registry API
+- Cloud Run API
+- Cloud Build API
 
 ### 로그 확인:
-- GitHub Actions 로그에서 "Verify Google Cloud authentication" 단계 확인
-- 프로젝트 ID와 계정 정보가 올바르게 표시되는지 확인
+- GitHub Actions 로그에서 "Manual Google Cloud Authentication" 단계 확인
+- JSON 형식 오류나 인증 실패 메시지 확인
 
 ## 📞 지원
 
 문제가 지속되면 다음을 확인하세요:
 1. Google Cloud Console에서 서비스 계정 상태
 2. GitHub Actions 로그의 상세 오류 메시지
-3. Google Cloud 프로젝트의 API 활성화 상태 
+3. Google Cloud 프로젝트의 API 활성화 상태
+4. 서비스 계정 키의 JSON 형식이 올바른지 확인
+
+## 🧪 Secrets 테스트
+
+GitHub Actions에서 "Test GitHub Secrets" 워크플로우를 실행하여 설정을 확인할 수 있습니다:
+1. GitHub 저장소 → Actions 탭
+2. "Test GitHub Secrets" 워크플로우 선택
+3. "Run workflow" 버튼 클릭
+4. 결과 확인 
