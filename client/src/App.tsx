@@ -21,6 +21,8 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import gcampLogo from './assets/gcamp_logo.svg';
+import gcampNameLogo from './assets/gcamp_name_logo.svg';
 
 // Supabase 클라이언트 초기화
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -315,12 +317,12 @@ function App() {
       <Navbar bg="dark" variant="dark" expand="lg" className="custom-navbar">
         <Container className="navbar-container">
           <Navbar.Brand href="#home" className="brand-container">
-            <img src="/gcamp_logo.svg" alt="GrowthCamp Logo" className="brand-logo" />
+            <img src={gcampLogo} alt="GrowthCamp Logo" className="brand-logo" />
           </Navbar.Brand>
           
           {/* 중앙 타이틀 */}
           <div className="center-title">
-            <img src="/gcamp_name_logo.svg" alt="GrowthCamp" className="brand-name-logo" />
+            <img src={gcampNameLogo} alt="GrowthCamp" className="brand-name-logo" />
             <span className="brand-subtitle">AX Tools</span>
           </div>
           
