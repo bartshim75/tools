@@ -32,6 +32,8 @@ jobs:
         echo "Current project: $(gcloud config get-value project)"
         echo "Current account: $(gcloud config get-value account)"
         gcloud auth list
+        echo "Testing basic gcloud command..."
+        gcloud projects describe ${{ env.PROJECT_ID }}
         
     - name: Configure Docker for Artifact Registry
       run: |
@@ -40,14 +42,15 @@ jobs:
     - name: Create Artifact Registry repository (if not exists)
       run: |
         echo "Checking if repository exists..."
-        gcloud artifacts repositories describe ${{ env.REPOSITORY }} \
-          --location=${{ env.REGION }} \
-          --quiet || \
-        (echo "Repository does not exist, creating..." && \
-        gcloud artifacts repositories create ${{ env.REPOSITORY }} \
-          --repository-format=docker \
-          --location=${{ env.REGION }} \
-          --description="AX Tools App Repository")
+        if gcloud artifacts repositories describe ${{ env.REPOSITORY }} --location=${{ env.REGION }} --quiet 2>/dev/null; then
+          echo "Repository already exists"
+        else
+          echo "Repository does not exist, creating..."
+          gcloud artifacts repositories create ${{ env.REPOSITORY }} \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --description="AX Tools App Repository"
+        fi
         
     - name: Build and push Docker image
       run: |
