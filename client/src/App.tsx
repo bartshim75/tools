@@ -2,6 +2,25 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import './App.css';
 import { Modal, Button, Form, Card, Row, Col, Navbar, Container } from 'react-bootstrap';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 // Supabase 클라이언트 초기화
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -14,6 +33,74 @@ interface Tool {
   name: string;
   url: string;
   description: string | null;
+  order_index: number;
+}
+
+// 드래그 가능한 도구 카드 컴포넌트
+function SortableToolCard({ tool, isAdmin, onEdit, onDelete }: {
+  tool: Tool;
+  isAdmin: boolean;
+  onEdit: (tool: Tool) => void;
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: tool.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <Card className={`tool-card ${isAdmin ? 'admin-mode' : ''} ${isDragging ? 'dragging' : ''}`}>
+        <Card.Body className="tool-card-body">
+          <Card.Title className="tool-title">{tool.name}</Card.Title>
+          <Card.Text className="tool-description">
+            {tool.description || '설명이 없습니다.'}
+          </Card.Text>
+          <div className="tool-actions">
+            <Button
+              variant="primary"
+              href={tool.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="use-tool-btn"
+            >
+              사용하기
+            </Button>
+            {isAdmin && (
+              <div className="admin-actions">
+                <Button
+                  variant="warning"
+                  size="sm"
+                  onClick={() => onEdit(tool)}
+                  className="edit-btn"
+                >
+                  수정
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onDelete(tool.id)}
+                  className="delete-btn"
+                >
+                  삭제
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card.Body>
+      </Card>
+    </div>
+  );
 }
 
 function App() {
@@ -25,6 +112,14 @@ function App() {
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAddEditModal, setShowAddEditModal] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchTools();
@@ -50,7 +145,7 @@ function App() {
     const { data, error } = await supabase
       .from('tools')
       .select('*')
-      .order('name', { ascending: true });
+      .order('order_index', { ascending: true });
     if (error) {
       console.error('Error fetching tools:', error);
     } else {
@@ -89,9 +184,12 @@ function App() {
 
   const handleAddTool = async (e: React.FormEvent) => {
     e.preventDefault();
+    const maxOrderIndex = tools.length > 0 ? Math.max(...tools.map(t => t.order_index)) : -1;
+    const newToolWithOrder = { ...newTool, order_index: maxOrderIndex + 1 };
+    
     const { data, error } = await supabase
       .from('tools')
-      .insert([newTool])
+      .insert([newToolWithOrder])
       .select();
     if (error) {
       alert('Error adding tool: ' + error.message);
@@ -144,93 +242,146 @@ function App() {
 
   const openAddModal = () => {
     setEditingTool(null);
-    setNewTool({ name: '', url: '', description: '' });
+    setNewTool({ name: '', url: 'https://', description: '' }); // URL 자동입력
     setShowAddEditModal(true);
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setIsReordering(true);
+      
+      const oldIndex = tools.findIndex(tool => tool.id === active.id);
+      const newIndex = tools.findIndex(tool => tool.id === over?.id);
+      
+      const newTools = arrayMove(tools, oldIndex, newIndex);
+      setTools(newTools);
+
+      try {
+        // 단일 도구씩 순차적으로 업데이트
+        for (let i = 0; i < newTools.length; i++) {
+          const tool = newTools[i];
+          const { error } = await supabase
+            .from('tools')
+            .update({ order_index: i })
+            .eq('id', tool.id);
+          
+          if (error) {
+            console.error(`Error updating tool ${tool.name}:`, error);
+            throw error;
+          }
+        }
+        
+        alert('도구 순서가 성공적으로 변경되었습니다!');
+      } catch (error) {
+        console.error('Error updating tool order:', error);
+        alert('순서 변경 중 오류가 발생했습니다. 콘솔을 확인해주세요.');
+        // 오류 시 원래 순서로 복원
+        fetchTools();
+      }
+      
+      setIsReordering(false);
+    }
+  };
+
   return (
-    <>
-      <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
-        <Container style={{ maxWidth: '1280px' }}>
-          <Navbar.Brand href="#home">Growthcamp AX Tools</Navbar.Brand>
+    <div className="app-container">
+      <Navbar bg="dark" variant="dark" expand="lg" className="custom-navbar">
+        <Container className="navbar-container">
+          <Navbar.Brand href="#home" className="brand-container">
+            <img src="/gcamp_logo.svg" alt="GrowthCamp Logo" className="brand-logo" />
+          </Navbar.Brand>
+          
+          {/* 중앙 타이틀 */}
+          <div className="center-title">
+            <img src="/gcamp_name_logo.svg" alt="GrowthCamp" className="brand-name-logo" />
+            <span className="brand-subtitle">AX Tools</span>
+          </div>
+          
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
             {isAdmin ? (
-              <Button variant="outline-light" onClick={handleLogout}>Admin Logout</Button>
+              <Button variant="outline-light" size="sm" onClick={handleLogout} className="login-btn">
+                로그아웃
+              </Button>
             ) : (
-              <Button variant="outline-light" onClick={() => setShowLoginModal(true)}>Admin Login</Button>
+              <Button variant="outline-light" size="sm" onClick={() => setShowLoginModal(true)} className="login-btn">
+                로그인
+              </Button>
             )}
           </Navbar.Collapse>
         </Container>
       </Navbar>
 
-      <Container style={{ maxWidth: '1280px' }} className="pb-5">
-        {isAdmin && (
-          <div className="d-flex justify-content-end mb-4">
-            <Button variant="primary" onClick={openAddModal}>Add New Tool</Button>
-          </div>
-        )}
+      <main className="main-content">
+        <Container className="content-container">
+          {isAdmin && (
+            <div className="admin-controls">
+              <Button variant="primary" onClick={openAddModal} className="add-tool-btn">
+                새 도구 추가
+              </Button>
+            </div>
+          )}
 
-        <h2 className="mb-4 text-center">Available Tools</h2>
-        {tools.length === 0 ? (
-          <p className="text-center">No tools available. Please add some!</p>
-        ) : (
-          <Row xs={1} md={2} lg={3} className="g-4">
-            {tools.map((tool) => (
-              <Col key={tool.id}>
-                <Card className="h-100 shadow-sm">
-                  <Card.Body className="d-flex flex-column">
-                    <Card.Title className="text-primary">{tool.name}</Card.Title>
-                    <Card.Text className="flex-grow-1 text-muted">{tool.description || 'No description provided.'}</Card.Text>
-                    <div className="mt-auto">
-                      <Button
-                        variant="info"
-                        href={tool.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-100 mb-2"
-                      >
-                        Go to Tool
-                      </Button>
-                      {isAdmin && (
-                        <div className="d-flex justify-content-between">
-                          <Button
-                            variant="warning"
-                            className="w-50 me-1"
-                            onClick={() => openEditModal(tool)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="danger"
-                            className="w-50 ms-1"
-                            onClick={() => handleDeleteTool(tool.id)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        )}
-      </Container>
+          <h1 className="main-title">지금 활용가능한 도구들</h1>
+          
+          {tools.length === 0 ? (
+            <div className="empty-state">
+              <p>사용 가능한 도구가 없습니다. 관리자가 도구를 추가해주세요!</p>
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={tools.map(tool => tool.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <Row xs={1} md={2} lg={3} className="tools-grid">
+                  {tools.map((tool) => (
+                    <Col key={tool.id}>
+                      <SortableToolCard
+                        tool={tool}
+                        isAdmin={isAdmin}
+                        onEdit={openEditModal}
+                        onDelete={handleDeleteTool}
+                      />
+                    </Col>
+                  ))}
+                </Row>
+              </SortableContext>
+            </DndContext>
+          )}
+          
+          {isReordering && (
+            <div className="reordering-overlay">
+              <div className="reordering-spinner">순서 변경 중...</div>
+            </div>
+          )}
+        </Container>
+      </main>
+
+      <footer className="footer">
+        <Container>
+          <p className="footer-text">© AX Leading by GrowthCamp. All rights reserved.</p>
+        </Container>
+      </footer>
 
       {/* Login Modal */}
       <Modal show={showLoginModal} onHide={() => setShowLoginModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Admin Login</Modal.Title>
+          <Modal.Title>관리자 로그인</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleLogin}>
             <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Email address</Form.Label>
+              <Form.Label>이메일 주소</Form.Label>
               <Form.Control
                 type="email"
-                placeholder="Enter email"
+                placeholder="이메일을 입력하세요"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -238,17 +389,17 @@ function App() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
-              <Form.Label>Password</Form.Label>
+              <Form.Label>비밀번호</Form.Label>
               <Form.Control
                 type="password"
-                placeholder="Password"
+                placeholder="비밀번호를 입력하세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </Form.Group>
             <Button variant="primary" type="submit" className="w-100">
-              Login
+              로그인
             </Button>
           </Form>
         </Modal.Body>
@@ -257,15 +408,15 @@ function App() {
       {/* Add/Edit Tool Modal */}
       <Modal show={showAddEditModal} onHide={() => setShowAddEditModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{editingTool ? 'Edit Tool' : 'Add New Tool'}</Modal.Title>
+          <Modal.Title>{editingTool ? '도구 수정' : '새 AX도구 추가'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={editingTool ? handleUpdateTool : handleAddTool}>
             <Form.Group className="mb-3" controlId="toolName">
-              <Form.Label>Tool Name</Form.Label>
+              <Form.Label>도구 이름</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter tool name"
+                placeholder="도구 이름을 입력하세요"
                 value={editingTool ? editingTool.name : newTool.name}
                 onChange={(e) => editingTool ? setEditingTool({ ...editingTool, name: e.target.value }) : setNewTool({ ...newTool, name: e.target.value })}
                 required
@@ -276,7 +427,7 @@ function App() {
               <Form.Label>URL</Form.Label>
               <Form.Control
                 type="url"
-                placeholder="Enter tool URL"
+                placeholder="도구 URL을 입력하세요"
                 value={editingTool ? editingTool.url : newTool.url}
                 onChange={(e) => editingTool ? setEditingTool({ ...editingTool, url: e.target.value }) : setNewTool({ ...newTool, url: e.target.value })}
                 required
@@ -284,23 +435,23 @@ function App() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="toolDescription">
-              <Form.Label>Description (Optional)</Form.Label>
+              <Form.Label>설명 (선택사항)</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
-                placeholder="Enter description"
+                placeholder="도구 설명을 입력하세요"
                 value={editingTool ? editingTool.description || '' : newTool.description}
                 onChange={(e) => editingTool ? setEditingTool({ ...editingTool, description: e.target.value }) : setNewTool({ ...newTool, description: e.target.value })}
               />
             </Form.Group>
 
             <Button variant="success" type="submit" className="w-100">
-              {editingTool ? 'Update Tool' : 'Add Tool'}
+              {editingTool ? '도구 수정' : '도구 추가'}
             </Button>
           </Form>
         </Modal.Body>
       </Modal>
-    </>
+    </div>
   );
 }
 

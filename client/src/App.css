@@ -1,42 +1,504 @@
-#root {
+/* 전체 앱 컨테이너 */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #CBE9FF;
+}
+
+/* 네비게이션 바 스타일링 */
+.custom-navbar {
+  background: rgba(33, 37, 41, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 0;
+}
+
+.navbar-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 1rem;
+  position: relative;
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: white;
+}
+
+.brand-logo {
+  height: 2.5rem;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.brand-name-logo {
+  height: 1.5rem;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.brand-subtitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #adb5bd;
+  margin-top: 0.125rem;
+}
+
+.login-btn {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 중앙 타이틀 영역 */
+.center-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 10;
+  height: 50px; /* 세로 크기 50px로 증가 */
+  white-space: nowrap; /* 한 줄로 표시 강제 */
+  min-width: 0; /* 플렉스 아이템 축소 허용 */
+}
+
+.center-title .brand-name-logo {
+  height: 38px; /* 로고 크기 38px로 설정 */
+  width: auto;
+  filter: none; /* 원본 컬러 사용 */
+  flex-shrink: 0; /* 로고 크기 고정 */
+}
+
+.center-title .brand-subtitle {
+  font-size: 1.56rem; /* 1.2rem에서 30% 증가 (1.2 * 1.3 = 1.56) */
+  font-weight: 700; /* 볼드체 적용 */
+  color: white;
+  margin: 0;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  overflow: hidden; /* 넘치는 텍스트 숨김 */
+  text-overflow: ellipsis; /* 넘치는 텍스트에 ... 표시 */
+}
+
+/* 메인 콘텐츠 영역 */
+.main-content {
+  flex: 1;
+  padding: 2rem 0;
+}
+
+.content-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* 관리자 컨트롤 */
+.admin-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+}
+
+.add-tool-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.add-tool-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+/* 메인 타이틀 */
+.main-title {
   text-align: center;
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* 빈 상태 */
+.empty-state {
+  text-align: center;
+  color: #2c3e50;
+  font-size: 1.125rem;
+  opacity: 0.8;
 }
 
-@keyframes logo-spin {
+/* 도구 그리드 */
+.tools-grid {
+  margin-bottom: 2rem;
+}
+
+/* 도구 카드 */
+.tool-card {
+  height: 100%;
+  border: none;
+  border-radius: 24px; /* 더 둥글게 변경 */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  margin-bottom: 2rem; /* 카드 간 상하 마진 추가 */
+  cursor: grab;
+}
+
+.tool-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+}
+
+.tool-card:active {
+  cursor: grabbing;
+}
+
+.tool-card.dragging {
+  transform: rotate(5deg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.tool-card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  align-items: center; /* 카드 내용 중앙 정렬 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+}
+
+.tool-title {
+  color: #2c3e50;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  width: 100%; /* 전체 너비 사용 */
+}
+
+.tool-description {
+  color: #6c757d;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  flex-grow: 1;
+  margin-bottom: 1rem;
+  width: 100%; /* 전체 너비 사용 */
+}
+
+.tool-actions {
+  margin-top: auto;
+  width: 100%; /* 전체 너비 사용 */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 버튼들 중앙 정렬 */
+  justify-content: flex-end; /* bottom 정렬 */
+  margin-bottom: 0; /* bottom 마진 제거 */
+}
+
+.use-tool-btn {
+  width: 80%; /* 버튼 크기 줄임 */
+  margin: 0 auto 0.75rem auto; /* 중앙 정렬 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.use-tool-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center; /* 중앙 정렬 */
+  width: 100%; /* 전체 너비 사용 */
+}
+
+.edit-btn, .delete-btn {
+  flex: 0 0 auto; /* 고정 크기 */
+  width: 35%; /* 버튼 크기 줄임 */
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* 로그인하지 않은 상태에서 사용하기 버튼 위치 조정 */
+.tool-card:not(.admin-mode) .tool-actions {
+  margin-top: auto;
+  padding-bottom: 0; /* 하단 패딩 제거 */
+}
+
+.tool-card:not(.admin-mode) .tool-description {
+  margin-bottom: 0.5rem; /* description과 버튼 간격 줄임 */
+}
+
+.tool-card:not(.admin-mode) .use-tool-btn {
+  margin: 0.75rem auto 0 auto; /* 상단 0.75rem, 하단 0 */
+}
+
+/* 드래그 앤 드롭 관련 스타일 */
+.reordering-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.reordering-spinner {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* 관리자 모드에서만 드래그 가능하도록 */
+.tool-card:not(.admin-mode) {
+  cursor: default;
+}
+
+.tool-card:not(.admin-mode):hover {
+  cursor: default;
+}
+
+.tool-card:not(.admin-mode):active {
+  cursor: default;
+}
+
+/* 푸터 */
+.footer {
+  background: rgba(33, 37, 41, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 0;
+  margin-top: auto;
+}
+
+.footer-text {
+  text-align: center;
+  color: #adb5bd;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* 모달 스타일링 */
+.modal-content {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.5rem 1.5rem 1rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .brand-container {
+    gap: 0.5rem;
+  }
+  
+  .brand-logo {
+    height: 2rem;
+  }
+  
+  .brand-name-logo {
+    height: 1.25rem;
+  }
+  
+  .brand-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .center-title .brand-subtitle {
+    font-size: 1.25rem; /* 1.56rem에서 20% 감소 */
+  }
+  
+  .center-title .brand-name-logo {
+    height: 30px; /* 38px에서 20% 감소 */
+  }
+  
+  .tool-card-body {
+    padding: 1rem;
+  }
+  
+  .tool-title {
+    font-size: 1.125rem;
+  }
+  
+  .content-container {
+    padding: 0 0.5rem;
+  }
+  
+  .navbar-container {
+    padding: 0 0.5rem;
+  }
+  
+  /* 768px 이하에서도 중앙 타이틀 표시 */
+  .center-title {
+    display: flex;
+    gap: 0.5rem; /* 간격 줄임 */
+  }
+}
+
+@media (max-width: 576px) {
+  .main-title {
+    font-size: 1.75rem;
+  }
+  
+  .brand-text {
+    display: none;
+  }
+  
+  .tool-card-body {
+    padding: 0.875rem;
+  }
+  
+  .use-tool-btn {
+    width: 90%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  .admin-actions {
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  
+  .edit-btn, .delete-btn {
+    width: 100%;
+    font-size: 0.7rem;
+    padding: 0.375rem;
+  }
+  
+  /* 모바일에서 중앙 타이틀 크기 추가 감소 */
+  .center-title .brand-subtitle {
+    font-size: 1rem; /* 1.25rem에서 추가 감소 */
+  }
+  
+  .center-title .brand-name-logo {
+    height: 24px; /* 30px에서 추가 감소 */
+  }
+  
+  .center-title {
+    gap: 0.375rem; /* 간격 더 줄임 */
+  }
+}
+
+/* 태블릿 중간 크기 (770~996px) 대응 */
+@media (min-width: 769px) and (max-width: 996px) {
+  .center-title .brand-subtitle {
+    font-size: 1.4rem; /* 770~996px에서 적절한 크기 */
+  }
+  
+  .center-title .brand-name-logo {
+    height: 32px; /* 적절한 로고 크기 */
+  }
+  
+  .center-title {
+    gap: 0.625rem; /* 적절한 간격 */
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .tool-card {
+    background: rgba(52, 58, 64, 0.95);
+  }
+  
+  .tool-title {
+    color: #f8f9fa;
+  }
+  
+  .tool-description {
+    color: #adb5bd;
+  }
+}
+
+/* 애니메이션 */
+@keyframes fadeInUp {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.tool-card {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.card {
-  padding: 2em;
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.read-the-docs {
-  color: #888;
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
 }
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+

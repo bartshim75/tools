@@ -1,0 +1,66 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  BUCKET_NAME: ${{ secrets.GCP_BUCKET_NAME }}
+  REGION: asia-northeast3
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: client/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd client
+        npm ci
+        
+    - name: Build application
+      run: |
+        cd client
+        npm run build
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        
+    - name: Setup Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+        
+    - name: Deploy to Google Cloud Storage
+      run: |
+        gsutil -m rsync -r -d client/dist gs://${{ env.BUCKET_NAME }}
+        
+    - name: Set public access
+      run: |
+        gsutil iam ch allUsers:objectViewer gs://${{ env.BUCKET_NAME }}
+        
+    - name: Configure website
+      run: |
+        gsutil web set -m index.html -e 404.html gs://${{ env.BUCKET_NAME }}
+        
+    - name: Invalidate CDN cache
+      run: |
+        gcloud compute url-maps invalidate-cdn-cache default \
+          --path "/*" \
+          --async
+      if: success() 
