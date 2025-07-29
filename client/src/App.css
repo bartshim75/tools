@@ -166,12 +166,22 @@
 
 /* 도구 그리드 */
 .tools-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 2rem !important;
   margin-bottom: 2rem;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* 도구 카드 */
+.tool-card-wrapper {
+  flex: 0 0 calc(32% - 0.5rem) !important;
+  margin-bottom: 2rem;
+}
+
 .tool-card {
-  height: 100%;
   border: none;
   border-radius: 16px !important; /* 16px로 변경 - Bootstrap 덮어쓰기 */
   background: rgba(255, 255, 255, 0.95);
@@ -179,8 +189,10 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   overflow: hidden;
-  margin-bottom: 2rem; /* 카드 간 상하 마진 추가 */
   position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
 }
 
 .tool-card:hover {
@@ -232,11 +244,13 @@
 
 .tool-card-body {
   padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
   align-items: center; /* 카드 내용 중앙 정렬 */
   text-align: center; /* 텍스트 중앙 정렬 */
+  flex: 1 !important;
+  justify-content: space-between !important;
 }
 
 .tool-title {
@@ -254,9 +268,15 @@
   color: #6c757d;
   font-size: 0.875rem;
   line-height: 1.5;
-  flex-grow: 1;
+  flex: 1 !important;
   margin-bottom: 1rem;
   width: 100%; /* 전체 너비 사용 */
+  display: -webkit-box !important;
+  -webkit-line-clamp: 4 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  min-height: 80px !important;
 }
 
 .tool-actions {

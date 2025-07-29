@@ -435,7 +435,7 @@ function App() {
       </Navbar>
 
       <main className="main-content">
-        <Container className="content-container">
+        <Container fluid className="content-container">
           {isAdmin && (
             <div className="admin-controls">
               <Button variant="primary" onClick={openAddModal} className="add-tool-btn">
@@ -460,11 +460,11 @@ function App() {
                 items={tools.map(tool => tool.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <Row xs={1} md={2} lg={3} className="tools-grid">
+                <div className="tools-grid">
                   {tools
                     .filter(tool => isAdmin || !tool.is_hidden) // 관리자가 아니면 숨겨진 도구는 표시하지 않음
                     .map((tool) => (
-                    <Col key={tool.id}>
+                    <div key={tool.id} className="tool-card-wrapper">
                       <SortableToolCard
                         tool={tool}
                         isAdmin={isAdmin}
@@ -472,9 +472,9 @@ function App() {
                         onDelete={handleDeleteTool}
                         onToggleVisibility={handleToggleVisibility}
                       />
-                    </Col>
+                    </div>
                   ))}
-                </Row>
+                </div>
               </SortableContext>
             </DndContext>
           )}
