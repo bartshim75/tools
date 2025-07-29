@@ -3,7 +3,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #CBE9FF;
+  background: #F0F4FF;
 }
 
 /* 네비게이션 바 스타일링 */
@@ -173,7 +173,7 @@
 .tool-card {
   height: 100%;
   border: none;
-  border-radius: 24px; /* 더 둥글게 변경 */
+  border-radius: 16px !important; /* 16px로 변경 - Bootstrap 덮어쓰기 */
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
