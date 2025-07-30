@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import './App.css';
-import { Modal, Button, Form, Card, Row, Col, Navbar, Container } from 'react-bootstrap';
+import { Modal, Button, Form, Card, Navbar, Container } from 'react-bootstrap';
 import {
   DndContext,
   closestCenter,
