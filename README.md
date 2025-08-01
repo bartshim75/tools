@@ -167,7 +167,7 @@ docker run -p 8080:8080 ax-tools-app
 
 ## 📄 라이선스
 
-© AX Leading by GrowthCamp. All rights reserved.
+© Better AX begins with GrowthCamp. All rights reserved.
 
 ## 📞 지원
 

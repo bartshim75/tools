@@ -489,7 +489,7 @@ function App() {
 
       <footer className="footer">
         <Container>
-          <p className="footer-text">© AX Leading by GrowthCamp. All rights reserved.</p>
+          <p className="footer-text">© Better AX begins with GrowthCamp. All rights reserved.</p>
         </Container>
       </footer>
 
