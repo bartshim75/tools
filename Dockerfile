@@ -12,7 +12,9 @@ RUN npm ci
 # Copy source code
 COPY client/ ./
 
-# Build the application
+# Build the application with environment variables
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
 RUN npm run build
 
 # Verify SVG files are copied
