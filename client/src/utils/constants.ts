@@ -1,6 +1,6 @@
-// 환경 변수
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// 환경 변수 (배포 환경에서 설정 필요)
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://jubncnuuyxslkgwauhnt.supabase.co';
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1Ym5jbnV1eXhzbGtnd2F1aG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzI5NzAsImV4cCI6MjA1MDU0ODk3MH0.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8';
 
 // 애플리케이션 설정
 export const APP_CONFIG = {
