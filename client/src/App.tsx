@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Button, Form, Navbar, Container } from 'react-bootstrap';
+import { Button, Navbar, Container } from 'react-bootstrap';
 import {
   DndContext,
   closestCenter,
@@ -30,11 +30,10 @@ import CustomAlert from './components/CustomAlert';
 import AuthModal from './components/AuthModal';
 import ToolModal from './components/ToolModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
-import { LoadingSpinner } from './components/LoadingSpinner';
 import SkeletonCard from './components/SkeletonCard';
 
 // Types
-import type { Tool, NewTool, ToolFormData } from './types/index.js';
+import type { Tool, NewTool } from './types/index.js';
 
 // Utils
 import { validateName, validateUrl, validateDescription, validateEmail, validatePassword, sanitizeInput } from './utils/validation';

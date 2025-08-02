@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import type { AlertState } from '../types/index.js';
 
 interface CustomAlertProps {

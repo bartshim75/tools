@@ -1,6 +1,5 @@
 import React, { memo, useCallback } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { validateEmail, validatePassword } from '../utils/validation';
 
 interface AuthModalProps {
   show: boolean;
