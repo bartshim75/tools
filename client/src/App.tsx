@@ -266,7 +266,7 @@ function App() {
         showAlert(result.error!, 'error');
       }
     }
-  }, [tools, reorderTools, showAlert]);
+  }, [reorderTools, showAlert]);
 
   const openEditModal = useCallback((tool: Tool) => {
     setEditingTool(tool);

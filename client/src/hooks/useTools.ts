@@ -18,8 +18,9 @@ export const useTools = () => {
         throw new Error('도구 목록을 불러오는 중 오류가 발생했습니다.');
       }
       
-      setTools(data || []);
-      return { success: true, data: data || [] };
+      const toolsData = (data || []) as unknown as Tool[];
+      setTools(toolsData);
+      return { success: true, data: toolsData };
     } catch (error) {
       console.error('Fetch tools error:', error);
       return { 
@@ -43,8 +44,9 @@ export const useTools = () => {
         throw new Error(error.message);
       }
       
-      setTools(prev => [...prev, data[0]]);
-      return { success: true, data: data[0] };
+      const newToolData = data[0] as unknown as Tool;
+      setTools(prev => [...prev, newToolData]);
+      return { success: true, data: newToolData };
     } catch (error) {
       console.error('Add tool error:', error);
       return { 
@@ -66,8 +68,9 @@ export const useTools = () => {
         throw new Error(error.message);
       }
       
-      setTools(prev => prev.map(tool => tool.id === id ? data[0] : tool));
-      return { success: true, data: data[0] };
+      const updatedToolData = data[0] as unknown as Tool;
+      setTools(prev => prev.map(tool => tool.id === id ? updatedToolData : tool));
+      return { success: true, data: updatedToolData };
     } catch (error) {
       console.error('Update tool error:', error);
       return { 
@@ -126,19 +129,33 @@ export const useTools = () => {
   const reorderTools = useCallback(async (newTools: Tool[]) => {
     setIsReordering(true);
     try {
-      // 단일 도구씩 순차적으로 업데이트
-      for (let i = 0; i < newTools.length; i++) {
-        const tool = newTools[i];
-        const { error } = await supabase
-          .from('tools')
-          .update({ order_index: i })
-          .eq('id', tool.id);
-        
-        if (error) {
-          throw new Error(`Error updating tool ${tool.name}: ${error.message}`);
-        }
+      // 원래 배열 순서를 유지하면서 유효한 도구만 필터링
+      const validTools = newTools.filter(tool => tool && tool.id);
+      
+      // newTools에 유효한 도구가 없으면 원래 배열 사용
+      if (validTools.length === 0) {
+        setTools(tools);
+        return { success: true };
       }
       
+      // 병렬 처리를 위한 Promise.all 사용
+      const updatePromises = validTools.map((tool, index) => 
+        supabase
+          .from('tools')
+          .update({ order_index: index })
+          .eq('id', tool.id)
+      );
+
+      const results = await Promise.all(updatePromises);
+      
+      // 모든 업데이트가 성공했는지 확인
+      const hasError = results.some(result => result.error);
+      if (hasError) {
+        const errorResult = results.find(result => result.error);
+        throw new Error(`Error updating tool order: ${errorResult?.error?.message}`);
+      }
+      
+      // 원래 배열 순서를 유지하여 상태 업데이트
       setTools(newTools);
       return { success: true };
     } catch (error) {
@@ -152,7 +169,7 @@ export const useTools = () => {
     } finally {
       setIsReordering(false);
     }
-  }, [fetchTools]);
+  }, [fetchTools, tools]);
 
   return {
     tools,
