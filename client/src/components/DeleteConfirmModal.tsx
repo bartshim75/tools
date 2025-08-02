@@ -1,4 +1,3 @@
-import React, { memo } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { Trash2, AlertTriangle } from 'lucide-react';
 
@@ -7,21 +6,21 @@ interface DeleteConfirmModalProps {
   onHide: () => void;
   onConfirm: () => void;
   toolName: string;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
-const DeleteConfirmModal = memo<DeleteConfirmModalProps>(({
+export const DeleteConfirmModal = ({
   show,
   onHide,
   onConfirm,
   toolName,
-  isLoading = false
-}) => {
+  isLoading
+}: DeleteConfirmModalProps) => {
   return (
     <Modal show={show} onHide={onHide} centered className="delete-confirm-modal">
-      <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="d-flex align-items-center gap-2 text-danger">
-          <Trash2 size={20} />
+      <Modal.Header closeButton>
+        <Modal.Title>
+          <Trash2 size={20} className="text-danger me-2" />
           도구 삭제
         </Modal.Title>
       </Modal.Header>
@@ -41,42 +40,20 @@ const DeleteConfirmModal = memo<DeleteConfirmModalProps>(({
         </div>
       </Modal.Body>
       
-      <Modal.Footer className="border-0 pt-0">
-        <div className="d-flex gap-2 w-100">
-          <Button
-            variant="outline-secondary"
-            onClick={onHide}
-            disabled={isLoading}
-            className="flex-fill"
-          >
-            취소
-          </Button>
-          <Button
-            variant="danger"
-            onClick={onConfirm}
-            disabled={isLoading}
-            className="flex-fill d-flex align-items-center justify-content-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="spinner-border spinner-border-sm" role="status">
-                  <span className="visually-hidden">삭제 중...</span>
-                </div>
-                삭제 중...
-              </>
-            ) : (
-              <>
-                <Trash2 size={16} />
-                삭제
-              </>
-            )}
-          </Button>
-        </div>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={onHide} disabled={isLoading}>
+          취소
+        </Button>
+        <Button 
+          variant="danger" 
+          onClick={onConfirm} 
+          disabled={isLoading}
+          className="d-flex align-items-center gap-2"
+        >
+          <Trash2 size={16} />
+          {isLoading ? '삭제 중...' : '삭제'}
+        </Button>
       </Modal.Footer>
     </Modal>
   );
-});
-
-DeleteConfirmModal.displayName = 'DeleteConfirmModal';
-
-export default DeleteConfirmModal; 
+}; 

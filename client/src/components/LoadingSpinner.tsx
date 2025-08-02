@@ -1,36 +1,18 @@
-import React, { memo } from 'react';
+import { Spinner } from 'react-bootstrap';
 
 interface LoadingSpinnerProps {
-  message?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark';
+  className?: string;
 }
 
-const LoadingSpinner = memo<LoadingSpinnerProps>(({ 
-  message = '로딩 중...', 
-  size = 'md',
-  variant = 'primary'
-}) => {
-  const sizeClass = {
-    sm: 'spinner-border-sm',
-    md: '',
-    lg: 'spinner-border-lg'
-  }[size];
-
+export const LoadingSpinner = ({ size = 'md', className = '' }: LoadingSpinnerProps) => {
+  const spinnerSize = size === 'sm' ? 'sm' : size === 'lg' ? undefined : undefined;
+  
   return (
-    <div className="d-flex flex-column align-items-center justify-content-center p-4">
-      <div className={`spinner-border ${sizeClass} text-${variant}`} role="status">
-        <span className="visually-hidden">{message}</span>
-      </div>
-      {message && (
-        <div className="mt-2 text-muted">
-          {message}
-        </div>
-      )}
+    <div className={`d-flex justify-content-center align-items-center ${className}`}>
+      <Spinner animation="border" size={spinnerSize} role="status">
+        <span className="visually-hidden">로딩 중...</span>
+      </Spinner>
     </div>
   );
-});
-
-LoadingSpinner.displayName = 'LoadingSpinner';
-
-export default LoadingSpinner; 
+}; 

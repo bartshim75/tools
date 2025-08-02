@@ -6,14 +6,14 @@ import {
   KeyboardSensor,
   PointerSensor,
   useSensor,
-  useSensors,
+  useSensors
 } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
+  verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import gcampLogo from './assets/gcamp_logo.svg';
 import gcampNameLogo from './assets/gcamp_name_logo.svg';
@@ -29,8 +29,8 @@ import ToolCard from './components/ToolCard';
 import CustomAlert from './components/CustomAlert';
 import AuthModal from './components/AuthModal';
 import ToolModal from './components/ToolModal';
-import DeleteConfirmModal from './components/DeleteConfirmModal';
-import LoadingSpinner from './components/LoadingSpinner';
+import { DeleteConfirmModal } from './components/DeleteConfirmModal';
+import { LoadingSpinner } from './components/LoadingSpinner';
 import SkeletonCard from './components/SkeletonCard';
 
 // Types

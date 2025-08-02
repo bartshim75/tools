@@ -1,7 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import type { Tool, NewTool } from '../types/index.js';
-import { validateName, validateUrl, validateDescription } from '../utils/validation';
 
 interface ToolModalProps {
   show: boolean;
